@@ -67,7 +67,7 @@ public class PlaynextCmd extends DJCommand
         private final CommandEvent event;
         private final boolean ytsearch;
         
-        private ResultHandler(Message m, CommandEvent event, boolean ytsearch)
+        public ResultHandler(Message m, CommandEvent event, boolean ytsearch)
         {
             this.m = m;
             this.event = event;

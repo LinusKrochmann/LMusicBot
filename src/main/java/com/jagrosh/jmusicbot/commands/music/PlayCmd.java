@@ -16,6 +16,7 @@
 package com.jagrosh.jmusicbot.commands.music;
 
 import com.jagrosh.jdautilities.command.CommandClient;
+import com.jagrosh.jmusicbot.commands.dj.PlaynextCmd;
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException.Severity;
@@ -72,6 +73,7 @@ public class PlayCmd extends MusicCommand {
         log = LoggerFactory.getLogger("Startup");
     }
 
+
     @Override
     public void doCommand(CommandEvent event) {
         if (event.getArgs().isEmpty() && event.getMessage().getAttachments().isEmpty()) {
@@ -92,25 +94,31 @@ public class PlayCmd extends MusicCommand {
             event.reply(builder.toString());
             return;
         }
-        String args = event.getArgs().startsWith("<") && event.getArgs().endsWith(">")
-                ? event.getArgs().substring(1, event.getArgs().length() - 1)
-                : event.getArgs().isEmpty() ? event.getMessage().getAttachments().get(0).getUrl() : event.getArgs();
-        String searchParameters = "";
-        List<String> convertedLink = new ArrayList();
+
+        String args = event.getArgs().startsWith("<") && event.getArgs().endsWith(">") ?
+                event.getArgs().substring(1, event.getArgs().length() - 1) :
+                event.getArgs().isEmpty() ? event.getMessage().getAttachments().get(0).getUrl() : event.getArgs();
+
+        String searchString = "";
+        List<String> resultTracks = new ArrayList();
+        String msgString = "";
+        
         if (args.contains("open.spotify.com")) {
             LinkConverter linkConverter = new LinkConverter(spotifyId, spotifySecret);
             try {
-                searchParameters = linkConverter.convert(args).get(0);
+                resultTracks = linkConverter.convert(args);
+                searchString = resultTracks.get(0);
+
             } catch (Exception e) {
                 log.error(e.toString());
             }
         } else {
-            searchParameters = args;
-
+            searchString = args;
         }
-        String finalSearchParameters = searchParameters;
-        CommandEventSetArgs commandEventSetArgs = new CommandEventSetArgs(event.getEvent(), finalSearchParameters, event.getClient());
-        event.reply(loadingEmoji + " Loading... `[" + finalSearchParameters + "]`", m -> bot.getPlayerManager().loadItemOrdered(event.getGuild(), finalSearchParameters, new ResultHandler(commandEventSetArgs.getMessage(), commandEventSetArgs, false)));
+        String finalSearchString = searchString;
+        CommandEvent commandEvent = new CommandEvent(event.getEvent(), finalSearchString, event.getClient());
+        msgString = loadingEmoji + " Loading... `[" + finalSearchString + "]`";
+        event.reply(msgString, m -> bot.getPlayerManager().loadItemOrdered(event.getGuild(), finalSearchString, new ResultHandler(commandEvent.getMessage(), commandEvent, false)));
     }
 
     private class ResultHandler implements AudioLoadResultHandler {
@@ -253,13 +261,6 @@ public class PlayCmd extends MusicCommand {
                     m.editMessage(FormatUtil.filter(str)).queue();
                 });
             });
-        }
-    }
-
-    private class CommandEventSetArgs extends CommandEvent {
-
-        public CommandEventSetArgs(MessageReceivedEvent event, String args, CommandClient client) {
-            super(event, args, client);
         }
     }
 }
