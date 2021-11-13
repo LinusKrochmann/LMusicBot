@@ -67,7 +67,7 @@ public class PlaynextCmd extends DJCommand
         private final CommandEvent event;
         private final boolean ytsearch;
         
-        public ResultHandler(Message m, CommandEvent event, boolean ytsearch)
+        private ResultHandler(Message m, CommandEvent event, boolean ytsearch)
         {
             this.m = m;
             this.event = event;
@@ -87,7 +87,7 @@ public class PlaynextCmd extends DJCommand
             String addMsg = FormatUtil.filter(event.getClient().getSuccess()+" Added **"+track.getInfo().title
                     +"** (`"+FormatUtil.formatTime(track.getDuration())+"`) "+(pos==0?"to begin playing":" to the queue at position "+pos));
             m.editMessage(addMsg).queue();
-        }
+         }
         
         @Override
         public void trackLoaded(AudioTrack track)
