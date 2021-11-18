@@ -15,13 +15,6 @@
  */
 package com.jagrosh.jmusicbot.commands.music;
 
-import com.jagrosh.jdautilities.command.CommandClient;
-import com.jagrosh.jmusicbot.commands.dj.PlaynextCmd;
-import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
-import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
-import com.sedmelluq.discord.lavaplayer.tools.FriendlyException.Severity;
-import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
-import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.jagrosh.jdautilities.command.Command;
 import com.jagrosh.jdautilities.command.CommandEvent;
 import com.jagrosh.jdautilities.menu.ButtonMenu;
@@ -32,18 +25,21 @@ import com.jagrosh.jmusicbot.commands.DJCommand;
 import com.jagrosh.jmusicbot.commands.MusicCommand;
 import com.jagrosh.jmusicbot.playlist.PlaylistLoader.Playlist;
 import com.jagrosh.jmusicbot.utils.FormatUtil;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
+import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
+import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
+import com.sedmelluq.discord.lavaplayer.tools.FriendlyException.Severity;
+import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
+import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.PermissionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import se.michaelthelin.spotify.exceptions.SpotifyWebApiException;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author John Grosh <john.a.grosh@gmail.com>
@@ -102,7 +98,7 @@ public class PlayCmd extends MusicCommand {
         String searchString = "";
         List<String> resultTracks = new ArrayList();
         String msgString = "";
-        
+
         if (args.contains("open.spotify.com")) {
             LinkConverter linkConverter = new LinkConverter(spotifyId, spotifySecret);
             try {
@@ -115,10 +111,10 @@ public class PlayCmd extends MusicCommand {
         } else {
             searchString = args;
         }
-        String finalSearchString = searchString;
+        String finalSearchString = searchString.trim();
         CommandEvent commandEvent = new CommandEvent(event.getEvent(), finalSearchString, event.getClient());
         msgString = loadingEmoji + " Loading... `[" + finalSearchString + "]`";
-        event.reply(msgString, m -> bot.getPlayerManager().loadItemOrdered(event.getGuild(), finalSearchString, new ResultHandler(commandEvent.getMessage(), commandEvent, false)));
+        event.reply(msgString, m -> bot.getPlayerManager().loadItemOrdered(event.getGuild(), finalSearchString, new ResultHandler(m, commandEvent, false)));
     }
 
     private class ResultHandler implements AudioLoadResultHandler {
@@ -157,12 +153,12 @@ public class PlayCmd extends MusicCommand {
                             else
                                 m.editMessage(addMsg).queue();
                         }).setFinalAction(m ->
-                {
-                    try {
-                        m.clearReactions().queue();
-                    } catch (PermissionException ignore) {
-                    }
-                }).build().display(m);
+                        {
+                            try {
+                                m.clearReactions().queue();
+                            } catch (PermissionException ignore) {
+                            }
+                        }).build().display(m);
             }
         }
 
