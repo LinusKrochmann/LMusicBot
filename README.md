@@ -13,7 +13,7 @@
 
 ### This fork also supports Spotify links
 
-##Todo
+## Todo
 * Spotify playlist integration
 * Dashboard
 
